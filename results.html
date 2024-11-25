@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Filtering System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+    <button onclick="goBack()" class="go-back-button">
+        <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+        Go Back
+    </button>
+<body class="body" onload="loadResults()">
+    <div class="main_rectangle">
+        <h1 class="page-title">Results</h1>
+
+        <div class="grid md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h2 class="section-title">Initial Image:</h2>
+            </div> 
+           <div> 
+                <h2 class="section-title">Blurred Image:</h2>
+           </div>
+           <div> 
+            <h2 class="section-title">Filtered Image:</h2>
+          </div>
+        
+        <h2 class="section-title">Statistical Characteristics:</h2>
+
+
+
+
+
+
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

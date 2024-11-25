@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Filtering System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="body">
+  <div class="main_rectangle">
+      <h1 class="page-title">Image Filtering System <br>in the Spatial Domain</h1>
+
+      <div class="grid md:grid-cols-2 gap-8 mb-8">
+        <div>
+          <h2 class="section-title">Processing Channel:</h2>
+          <div class="space-y-3">
+            <label class="subtitles-flex">
+              <input type="radio" name="channel" value="luminosity" checked class="radio-btn"/>
+              <div>
+                <span class="option-label">Luminosity</span>
+                <p class="option-description">Processes the image based on its brightness.</p>
+              </div>
+            </label>
+            <label class="subtitles-flex">
+              <input type="radio" name="channel" value="rgb" class="radio-btn"/>
+              <div>
+                <span class="option-label">RGB Channels</span>
+                <p class="option-description">Applies the filter to each color channel separately.</p>
+              </div>
+            </label>
+          </div>
+          
+          <h2 class="section-title" style="margin-top: 2rem">Noise Modeling:</h2>
+          <div class="space-y-3">
+            <label class="subtitles-flex">
+              <input type="radio" name="noise" value="gaussian" checked class="radio-btn"/>
+              <div>
+                <span class="option-label">Gaussian Noise</span>
+                <p class="option-description">Adds random variations to the image, distributed in a bell-curve pattern.</p>
+              </div>
+            </label>
+            <label class="subtitles-flex">
+              <input type="radio" name="noise" value="impulse" class="radio-btn"/>
+              <div>
+                <span class="option-label">Random Impulse Noise</span>
+                <p class="option-description">Introduces random black or white pixels to simulate salt-and-pepper noise.</p>
+              </div>
+            </label>
+            
+          </div>
+        </div>
+
+        <!-- Filter Selection -->
+        <div>
+          <h2 class="section-title">Choose a Filter:</h2>
+          <div class="space-y-5">
+            <label class="subtitles-flex">
+              <input type="radio" name="filter" value="mean" checked class="radio-btn"/>
+              <div>
+                <span class="option-label">Mean Filter (3x3 window)</span>
+                <p class="option-description">Smooths the image by averaging neighboring pixels.</p>
+              </div>
+            </label>
+            <label class="subtitles-flex">
+              <input type="radio" name="filter" value="smart" class="radio-btn"/>
+              <div>
+                <span class="option-label">Smart Filter (3x3 window)</span>
+                <p class="option-description">Adaptively smooths while preserving edges.</p>
+              </div>
+            </label>
+            <label class="subtitles-flex">
+              <input type="radio" name="filter" value="unsharp" class="radio-btn"/>
+              <div>
+                <span class="option-label">Unsharp Masking (3x3 window)</span>
+                <p class="option-description">Sharpens the image by enhancing edges.</p>
+              </div>
+            </label>
+            <label class="subtitles-flex">
+                <input type="radio" name="filter" value="sobel" class="radio-btn" />
+              <div>
+                <span class="option-label">Sobel Edge Detector</span>
+                <p class="option-description">Highlights edges in the image.</p>
+              </div>
+            </label>
+            <label class="subtitles-flex">
+              <input type="radio" name="filter" value="laplace" class="radio-btn"/>
+              <div>
+                <span class="option-label">Laplace Edge Detector</span>
+                <p class="option-description">Detects edges using second derivatives.</p>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Upload Section -->
+      <div id="drop-area" class="drop-area">
+        
+        <label for="file-upload" id="drop-area-label" class="drop-area-label">
+          <p class="drop-area-text">Drag & Drop files here or click to select</p>
+          <p class="drop-area-subtext">Only .jpeg and .png images allowed</p>
+          <input type="file" id="file-upload" accept="image/jpeg,image/png" onchange="handleFileChange(event)" class="choose-file-style">
+        </label>
+        <div id="preview" class="preview-container"></div>
+      </div>
+
+      <!-- Apply Filter Button -->
+      <div class="button-container">
+        <button onclick="applyFilter()" class="apply-filter-button">
+          <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+          Apply Filter
+        </button>
+      </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
