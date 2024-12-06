@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Image Filtering System</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
     <button onclick="goBack()" class="go-back-button">
         <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -27,16 +27,9 @@
            <div> 
             <h2 class="section-title">Filtered Image:</h2>
           </div>
-        
-        <h2 class="section-title">Statistical Characteristics:</h2>
 
-
-
-
-
-
-
+          <h2 class="section-title">Statistical Characteristics:</h2>
     </div>
-    <script src="script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

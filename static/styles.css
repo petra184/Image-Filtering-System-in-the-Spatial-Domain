@@ -232,3 +232,7 @@ body {
   box-shadow: 0 4px 8px rgba(43, 163, 43, 0.2);
   display: flex;
 }
+
+.results-stats{
+  padding:0px;
+}

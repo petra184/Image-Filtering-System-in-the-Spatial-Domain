@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Image Filtering System</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body class="body">
   <div class="main_rectangle">
@@ -51,7 +51,6 @@
           </div>
         </div>
 
-        <!-- Filter Selection -->
         <div>
           <h2 class="section-title">Choose a Filter:</h2>
           <div class="space-y-5">
@@ -94,7 +93,6 @@
         </div>
       </div>
 
-      <!-- Image Upload Section -->
       <div id="drop-area" class="drop-area">
         
         <label for="file-upload" id="drop-area-label" class="drop-area-label">
@@ -105,7 +103,6 @@
         <div id="preview" class="preview-container"></div>
       </div>
 
-      <!-- Apply Filter Button -->
       <div class="button-container">
         <button onclick="applyFilter()" class="apply-filter-button">
           <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -114,8 +111,8 @@
           Apply Filter
         </button>
       </div>
+      
   </div>
 
-  <script src="script.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
-</html>
