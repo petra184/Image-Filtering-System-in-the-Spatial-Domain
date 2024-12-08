@@ -24,9 +24,6 @@ This project implements an **Image Filtering System** that allows users to uploa
      ```bash
      pip install flask numpy
      ```
-     ```bash
-     npm install request-promise
-     ```
    - Start the Python server:
      ```bash
      python app.py
