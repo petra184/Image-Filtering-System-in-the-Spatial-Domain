@@ -110,27 +110,61 @@ function loadResults() {
     );
   }
 
-  // Insert the noisy (blurred) image
-  const blurredImageSection = document.querySelector('.grid .section-title:nth-child(2)');
-  if (blurredImageSection && noisyImage) {
-    blurredImageSection.insertAdjacentHTML(
-      'afterend',
-      `<img src="${noisyImage}" alt="Blurred Image" class="results-image">`
-    );
-  }
+  const data = {
+    image: initialImage,
+    processingChannel: channel,
+    noiseModeling: noise,
+    filter: filter_tu,
+  };
 
-  // Insert statistical characteristics
-  const statsSection = document.querySelector('.main_rectangle .section-title:nth-child(4)');
-  if (statsSection) {
-    statsSection.insertAdjacentHTML(
-      'afterend',
-      `<ul class="results-stats">
-        <li><strong>Processing Channel:</strong> ${channel || 'Not specified'}</li>
-        <li><strong>Noise Modeling:</strong> ${noise || 'Not specified'}</li>
-        <li><strong>Filter:</strong> ${filter_tu || 'Not specified'}</li>
-      </ul>`
-    );
-  }
+  fetch("http://127.0.0.1:5000/image_processing", {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch results from the backend.');
+      }
+      return response.json();
+    })
+    .then(data => {
+      const noisyImage = data.noisy_image;
+      let cValue = data.c_value;
+
+    // Round `cValue` to two decimal places
+      if (cValue !== undefined && cValue !== null) {
+        cValue = parseFloat(cValue).toFixed(2);
+      }
+
+      // Insert the noisy (blurred) image
+      const sectionTitles = document.querySelectorAll('.section-title');
+      const blurredImageSection = sectionTitles[1]; // Index corresponds to "Noisy Image"
+      if (blurredImageSection && noisyImage) {
+        blurredImageSection.insertAdjacentHTML(
+          'afterend',
+          `<img src="${noisyImage}" alt="Noisy Image" class="results-image">`
+        );
+      }
+
+      const statsSection = sectionTitles[3]; // Index corresponds to "Statistical Characteristics"
+      if (statsSection) {
+        statsSection.insertAdjacentHTML(
+          'afterend',
+          `<ul class="results-stats">
+            <li><strong>Processing Channel:</strong> ${channel || 'Not specified'}</li>
+            <li><strong>Noise Modeling:</strong> ${noise || 'Not specified'}</li>
+            <li><strong>Filter:</strong> ${filter_tu || 'Not specified'}</li>
+            <li><strong>Noise Corruption Coefficient/Corruption Rate:</strong> ${cValue || 'Not available'}</li>
+          </ul>`
+        );
+      }
+      
+    })
+    .catch(error => {
+      console.error('Error fetching the noisy image:', error);
+      alert('An error occurred while processing the image.');
+    });
 }
 
 

@@ -4,96 +4,108 @@ import numpy as np
 import io
 import cv2
 import base64
-from io import BytesIO
-from PIL import Image
 import random
+from skimage.color import rgb2gray
+from skimage.util import img_as_ubyte
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
 @app.route('/results')
 def results():
     return render_template('results.html')
 
 @app.route('/image_processing', methods=['POST'])
 def image_processing():
-    # Retrieve the image data from the JSON request
     data = request.get_json()
     if 'image' not in data:
         return jsonify({"error": "No image data provided"}), 400
 
-    # Decode the base64 image
+    processingChannel = data.get('processingChannel', None)
+    noiseModeling = data.get('noiseModeling', 'gaussian')
+    filter_to_use = data.get('filter', None)
+
     image_data = data['image']
-    processingChannel = data['processingChannel'],
-    noiseModeling = data['noiseModeling'],
-    filter_to_use = data['filter']
-    
-    image_data = image_data.split(",")[1]  # Remove the data:image/...;base64, prefix
-    image_bytes = io.BytesIO(base64.b64decode(image_data))
-    image = Image.open(image_bytes)
+    if ',' in image_data:  # Ensure the base64 string has a prefix to remove
+        image_data = image_data.split(",")[1]
 
-    # Convert PIL image to NumPy array
-    image_np = np.array(image)
-    if (filter_to_use == 'Gaussian Noise'):
-        c = random.uniform(0.2, 0.8)
-        noisy_image_np = gaussian_noise(image_np, c=c)
+    try:
+        image_bytes = io.BytesIO(base64.b64decode(image_data))
+    except Exception as e:
+        return jsonify({"error": f"Base64 decoding failed: {str(e)}"}), 400
+
+    # Load the image using PIL
+    pil_image = Image.open(image_bytes)
+    image_np = np.array(pil_image)  # Convert PIL to NumPy array
+    
+    # Convert NumPy array to OpenCV format (BGR)
+    if image_np.ndim == 2:  # Grayscale image
+        image_cv = image_np
     else:
-        c = random.uniform(0.2, 0.8)
-        noisy_image_np = gaussian_noise(image_np, c=c)
-    
+        image_cv = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
 
-    # Convert the NumPy array back to an image
-    noisy_image = Image.fromarray(noisy_image_np)
+    # Apply noise or other OpenCV-based processing
+    if noiseModeling == 'gaussian':
+        c = random.uniform(0.2, 0.8)
+        noisy_image_cv = gaussian_noise(image_cv, c=c)
+    else:
+        c = random.uniform(0.1, 0.2)
+        noisy_image_cv = impulse_noise(image_cv, corruption_rate=c)
+
+    # Convert processed OpenCV image back to RGB (for PIL compatibility)
+    noisy_image_rgb = cv2.cvtColor(noisy_image_cv, cv2.COLOR_BGR2RGB)
+    # Convert back to PIL for final processing
+    noisy_image_pil = Image.fromarray(noisy_image_rgb)
 
     # Encode the image back to base64
     buffered = io.BytesIO()
-    noisy_image = noisy_image.convert("RGB")  # Convert RGBA to RGB
-    noisy_image.save(buffered, format="JPEG")
+    noisy_image_pil.save(buffered, format="JPEG")
     noisy_image_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
-
-    # Return the processed image as a JSON response
-    return jsonify({"noisy_image": f"data:image/jpeg;base64,{noisy_image_base64}"}), 200
+    return jsonify({
+        "noisy_image": f"data:image/jpeg;base64,{noisy_image_base64}",
+        "c_value": c
+        }), 200
 
 def gaussian_noise(image, c):
-    """
-    Add Gaussian noise to an image.
-
-    Parameters:
-        image (numpy.ndarray): Input image (grayscale or RGB).
-        c (float): Scaling factor for the noise.
-
-    Returns:
-        numpy.ndarray: Noisy image.
-    """
     image = image.astype(np.float64)
-
-    if len(image.shape) == 3 and image.shape[2] == 3:
-        noisy_image = np.zeros_like(image)
-        for channel_idx in range(image.shape[2]):
-            channel = image[:, :, channel_idx]
-            
-            channel_std = np.std(channel)
-            noise_std = c * channel_std
-            noise = noise_std * np.random.randn(*channel.shape)
-            noisy_channel = np.clip(channel + noise, 0, 255)
-            noisy_image[:, :, channel_idx] = noisy_channel
-    
-    else:
-        image_std = np.std(image)
-        noise_std = c * image_std
-        noise = noise_std * np.random.randn(*image.shape)
-        noisy_image = np.clip(image + noise, 0, 255)
-    
-    noisy_image = noisy_image.astype(np.uint8)
-   
+    noise = np.random.randn(*image.shape) * c * np.std(image, axis=(0, 1), keepdims=True)
+    noisy_image = np.clip(image + noise, 0, 255).astype(np.uint8)
     return noisy_image
 
-def data():
-    #stavi gaussian coefficient
-    #stavi za pepper noise kolka je korupcija
-    return 0
+def impulse_noise(image, corruption_rate):
+    if len(image.shape) == 2:  # Grayscale image
+        rows, cols = image.shape
+        channels = 1  # Treat grayscale as having one channel
+    elif len(image.shape) == 3:  # Color image
+        rows, cols, channels = image.shape
+    else:
+        raise ValueError("Input image must be either grayscale or color (RGB).")
+
+    total_pixels = rows * cols
+
+    # Calculate the number of corrupted pixels
+    num_corrupted_pixels = round(corruption_rate * total_pixels)
+    
+    # Generate random indices for the pixels to be corrupted
+    corrupted_indices = np.random.choice(total_pixels, num_corrupted_pixels, replace=False)
+    
+    # Create a copy of the image to add noise
+    corrupted_img = np.copy(image)
+    
+    # Generate random noise values
+    random_values = np.random.randint(0, 256, (num_corrupted_pixels, channels))
+    
+    # Flatten the image and add noise
+    img_linear = corrupted_img.reshape(-1, channels)
+    img_linear[corrupted_indices] = random_values
+    
+    # Reshape the image back to its original dimensions
+    corrupted_img = img_linear.reshape((rows, cols, channels)) if channels > 1 else img_linear.reshape((rows, cols))
+
+    return corrupted_img
 
 if __name__ == '__main__':
     app.run(debug=True)
