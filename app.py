@@ -37,18 +37,15 @@ def image_processing():
     except Exception as e:
         return jsonify({"error": f"Base64 decoding failed: {str(e)}"}), 400
 
-    # Load the image using PIL
     pil_image = Image.open(image_bytes)
     image_np = np.array(pil_image)  # Convert PIL to NumPy array
     
-    # Convert NumPy array to OpenCV format (BGR)
     if image_np.ndim == 2:  # Grayscale image
         image_cv = image_np
     else:
         image_cv = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
 
-    # Apply noise or other OpenCV-based processing
-    if noiseModeling == 'gaussian':
+    if noiseModeling == 'Gaussian':
         c = random.uniform(0.2, 0.8)
         noisy_image_cv = gaussian_noise(image_cv, c=c)
     else:
@@ -57,7 +54,6 @@ def image_processing():
 
     # Convert processed OpenCV image back to RGB (for PIL compatibility)
     noisy_image_rgb = cv2.cvtColor(noisy_image_cv, cv2.COLOR_BGR2RGB)
-    # Convert back to PIL for final processing
     noisy_image_pil = Image.fromarray(noisy_image_rgb)
 
     # Encode the image back to base64
@@ -85,27 +81,20 @@ def impulse_noise(image, corruption_rate):
         raise ValueError("Input image must be either grayscale or color (RGB).")
 
     total_pixels = rows * cols
-
-    # Calculate the number of corrupted pixels
     num_corrupted_pixels = round(corruption_rate * total_pixels)
     
-    # Generate random indices for the pixels to be corrupted
     corrupted_indices = np.random.choice(total_pixels, num_corrupted_pixels, replace=False)
-    
-    # Create a copy of the image to add noise
     corrupted_img = np.copy(image)
-    
-    # Generate random noise values
     random_values = np.random.randint(0, 256, (num_corrupted_pixels, channels))
     
-    # Flatten the image and add noise
     img_linear = corrupted_img.reshape(-1, channels)
     img_linear[corrupted_indices] = random_values
     
-    # Reshape the image back to its original dimensions
     corrupted_img = img_linear.reshape((rows, cols, channels)) if channels > 1 else img_linear.reshape((rows, cols))
 
     return corrupted_img
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

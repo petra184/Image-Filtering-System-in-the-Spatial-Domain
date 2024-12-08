@@ -92,8 +92,6 @@ function applyFilter() {
   window.location.href = '/results';
 }
 
-
-
 function loadResults() {
   const initialImage = sessionStorage.getItem('initialImage');
   const noisyImage = sessionStorage.getItem('noisyImage');
@@ -153,9 +151,11 @@ function loadResults() {
           'afterend',
           `<ul class="results-stats">
             <li><strong>Processing Channel:</strong> ${channel || 'Not specified'}</li>
-            <li><strong>Noise Modeling:</strong> ${noise || 'Not specified'}</li>
             <li><strong>Filter:</strong> ${filter_tu || 'Not specified'}</li>
-            <li><strong>Noise Corruption Coefficient/Corruption Rate:</strong> ${cValue || 'Not available'}</li>
+            <li><strong>Noise Modeling:</strong> ${noise || 'Not specified'}</li>
+            <li><strong> ${noise === 'Gaussian' ? 'Noise Corruption Coefficient' : noise === 'Impulse' ? 'Corruption Rate' : 'Noise Corruption Coefficient/Corruption Rate'}:
+            </strong> ${cValue || 'Not available'}
+            </li>
           </ul>`
         );
       }
