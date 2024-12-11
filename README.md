@@ -22,7 +22,7 @@ This project implements an **Image Filtering System** that allows users to uploa
    - Open a terminal in the project folder.
    - Install the required dependencies by running:
      ```bash
-     pip install flask numpy
+     pip install flask pillow numpy opencv-python matplotlib
      ```
    - Start the Python server:
      ```bash
