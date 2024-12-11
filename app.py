@@ -231,20 +231,38 @@ def smart_filter(I, mode):
 
     return smart_filtered_img
 
+import numpy as np
+import cv2
+
 def unsharp_masking(I, k, mode):
     if I is None:
         raise ValueError("Input image is None. Provide a valid image for processing.")
 
-    if len(I.shape) == 2 or (len(I.shape) == 3 and I.shape[2] == 1):  # Grayscale
-        mode = "grayscale"
+    if len(I.shape) == 2:  # Grayscale image
+        image_type = "grayscale"
+    elif len(I.shape) == 3 and I.shape[2] == 3:  # RGB image
+        image_type = "RGB"
+    else:
+        raise ValueError("Unsupported image format. Provide a grayscale or RGB image.")
 
     if mode not in ["RGB", "Luminosity", "grayscale"]:
-        raise ValueError("Invalid mode. Choose from 'RGB', 'luminosity' or 'grayscale'.")
+        raise ValueError("Invalid mode. Choose from 'RGB', 'Luminosity', or 'grayscale'.")
 
     input_image = I.astype(np.float64)
-    mean_filter = np.ones((3, 3), np.float32) / 9
+    mean_filter = np.ones((5, 5), np.float32) / 25  # Increased kernel size
 
-    if mode == "RGB":
+    if mode == "grayscale":
+        if image_type != "grayscale":
+            raise ValueError("Input image is not grayscale. Use 'Luminosity' or 'RGB' mode for color images.")
+
+        blurred_image = cv2.filter2D(input_image, -1, mean_filter)
+        mask = input_image - blurred_image
+        sharpened_image = np.clip(input_image + k * mask, 0, 255)
+
+    elif mode == "RGB":
+        if image_type != "RGB":
+            raise ValueError("Input image is not RGB. Use 'grayscale' mode for grayscale images.")
+
         sharpened_image = np.zeros_like(input_image)
         for channel in range(3):
             channel_data = input_image[:, :, channel]
@@ -252,52 +270,61 @@ def unsharp_masking(I, k, mode):
             mask = channel_data - blurred_image
             sharpened_channel = channel_data + k * mask
             sharpened_image[:, :, channel] = np.clip(sharpened_channel, 0, 255)
+        sharpened_image = sharpened_image.astype(np.uint8)
+
     elif mode == "Luminosity":
-        luminosity = 0.2989 * input_image[:, :, 2] + 0.5870 * input_image[:, :, 1] + 0.1140 * input_image[:, :, 0]
-        blurred_image = cv2.filter2D(luminosity, -1, mean_filter)
-        mask = luminosity - blurred_image
-        sharpened_luminosity = luminosity + k * mask
-        sharpened_image = np.clip(sharpened_luminosity, 0, 255).astype(np.uint8)
-    elif mode == "grayscale":
-        blurred_image = cv2.filter2D(input_image, -1, mean_filter)
-        mask = input_image - blurred_image
-        sharpened_image = np.clip(input_image + k * mask, 0, 255).astype(np.uint8)
-    else:
-        raise ValueError(f"Unexpected mode: {mode}")
+        if image_type != "RGB":
+            raise ValueError("Luminosity mode requires an RGB image.")
 
-    sharpened_image = sharpened_image.astype(np.uint8)
-    return sharpened_image
+        # Convert RGB to YUV and extract the Y (luma) channel
+        yuv_image = cv2.cvtColor(I, cv2.COLOR_RGB2YUV)
+        luma_channel = yuv_image[:, :, 0].astype(np.float64)
 
+        # Apply unsharp masking to the luma channel
+        blurred_image = cv2.filter2D(luma_channel, -1, mean_filter)
+        mask = luma_channel - blurred_image
+        sharpened_luma = luma_channel + k * mask
+        sharpened_image = np.clip(sharpened_luma, 0, 255).astype(np.uint8)
+
+    return sharpened_image.astype(np.uint8)
+
+
+import cv2
+import numpy as np
 
 def sobel_edge(image, process_mode='RGB'):
-    import cv2
-    import numpy as np
+    if image is None:
+        raise ValueError("Input image is None. Provide a valid image.")
     
-    if len(image.shape) == 2 or image.shape[2] == 1:
-        image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-
-    if process_mode == 'Luminosity':
-        input_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        processed_image = np.zeros_like(input_image, dtype=np.uint8)
+    if len(image.shape) == 2 or (len(image.shape) == 3 and image.shape[2] == 1):
+        grayscale_image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) if len(image.shape) == 2 else image
     else:
-        input_image = image.astype(np.float64)
-        processed_image = np.zeros_like(image, dtype=np.uint8)
+        grayscale_image = image
 
+    # Define Sobel filters
     Mx = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])  # Horizontal mask
     My = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])  # Vertical mask
 
     if process_mode == 'Luminosity':
+        # Convert to grayscale for luminosity processing
+        input_image = cv2.cvtColor(grayscale_image, cv2.COLOR_BGR2GRAY)
         Gx = cv2.filter2D(input_image, cv2.CV_64F, Mx)
         Gy = cv2.filter2D(input_image, cv2.CV_64F, My)
-        sobel_filtered = np.sqrt(Gx**2 + Gy**2)
-        processed_image = cv2.convertScaleAbs(sobel_filtered)
-    else:
+        sobel_magnitude = np.sqrt(Gx**2 + Gy**2)
+        processed_image = cv2.convertScaleAbs(sobel_magnitude)
+    elif process_mode == 'RGB':
+        input_image = grayscale_image.astype(np.float64)
+        processed_image = np.zeros_like(input_image, dtype=np.uint8)
+
+        # Process each channel independently
         for channel in range(3):
             channel_data = input_image[:, :, channel]
             Gx = cv2.filter2D(channel_data, cv2.CV_64F, Mx)
             Gy = cv2.filter2D(channel_data, cv2.CV_64F, My)
-            sobel_filtered = np.sqrt(Gx**2 + Gy**2)
-            processed_image[:, :, channel] = cv2.convertScaleAbs(sobel_filtered)
+            sobel_magnitude = np.sqrt(Gx**2 + Gy**2)
+            processed_image[:, :, channel] = cv2.convertScaleAbs(sobel_magnitude)
+    else:
+        raise ValueError("Invalid process_mode. Use 'RGB' or 'Luminosity'.")
 
     return processed_image
 
