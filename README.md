@@ -1,7 +1,7 @@
 # Image Filtering System in the Spatial Domain
 
 ## 📄 Short Summary of the Project
-This project implements an **Image Filtering System** that allows users to upload an image, apply Gaussian noise to it, and view the original and processed (blurred) images. The system demonstrates how image filtering techniques work by combining a Python backend for computations and a JavaScript-based frontend for interactivity. Users can select processing options, such as noise modeling and filter types, and view the results on a visually appealing interface.
+This project implements an **Image Filtering System** that allows users to upload an image, apply Gaussian or Random Impulse noise to it, and view the original, noisy and filtered images. The system demonstrates how image filtering techniques work by combining a Python backend for computations and a JavaScript-based frontend for interactivity. Users can select processing options, such as noise modeling and filter types, and view the results on a visually appealing interface.
 
 ---
 
