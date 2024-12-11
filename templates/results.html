@@ -27,9 +27,36 @@
             <div> 
                 <h2 class="section-title">Filtered Image:</h2>
             </div>
+        </div>
+
+        <!-- Updated Row for Statistical Characteristics and Metrics -->
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Statistical Characteristics Section -->
             <div>
                 <h2 class="section-title">Statistical Characteristics:</h2>
+                <div id="statistical-characteristics-table-container">
+                    <table class="table-auto border-collapse table-rounded border border-gray-400 w-full text-center">
+                        <thead>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Processing Chanel</th>
+                                <th class="border border-gray-400 px-4 py-2">Filter Used</th>
+                                <th class="border border-gray-400 px-4 py-2">Noise Added</th>
+                                <th class="border border-gray-400 px-4 py-2">Noise Corruption Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+            <!-- Metrics Section -->
             <div>
                 <h2 class="section-title">Metrics:</h2>
                 <div id="metrics-table-container">
@@ -69,7 +96,6 @@
 
         <div class="image-details-section">
             <h2 class="section-title2">Image Details:</h2>
-        
             <div class="mt-4 flex space-x-3">
                 <!-- Initial Image Table -->
                 <div id="initial-image-table-container" class="mb-6">
@@ -125,7 +151,7 @@
                         </tbody>
                     </table>
                 </div>
-        
+
                 <!-- Noisy Image Table -->
                 <div id="noisy-image-table-container" class="mb-6">
                     <table class="table-auto border-collapse table-rounded border border-gray-400 w-full text-center">
@@ -180,7 +206,7 @@
                         </tbody>
                     </table>
                 </div>
-        
+
                 <!-- Filtered Image Table -->
                 <div id="filtered-image-table-container" class="mb-6">
                     <table class="table-auto border-collapse table-rounded border border-gray-400 w-full text-center">
@@ -237,7 +263,6 @@
                 </div>
             </div>
         </div>
-        
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

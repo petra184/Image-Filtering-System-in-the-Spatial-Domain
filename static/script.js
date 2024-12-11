@@ -3,7 +3,7 @@ function handleFileChange(event) {
   previewFiles(files);
 }
 
-function previewFiles(files) {
+function previewFiles(files, fileInput) {
   const previewContainer = document.getElementById('preview');
   const dropAreaLabel = document.getElementById('drop-area-label');
 
@@ -11,35 +11,38 @@ function previewFiles(files) {
   previewContainer.innerHTML = '';
 
   // Loop through files and add each to preview
-  Array.from(files).forEach(file => {
-      if (file.type.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onload = function(event) {
-              const imgContainer = document.createElement('div');
-              imgContainer.className = 'preview-item'; // Updated class for styling
+  Array.from(files).forEach((file, index) => {
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'preview-item'; // Updated class for styling
 
-              const img = document.createElement('img');
-              img.src = event.target.result;
-              img.className = 'preview-image';
+        const img = document.createElement('img');
+        img.src = event.target.result;
+        img.className = 'preview-image';
 
-              // Create remove button
-              const removeButton = document.createElement('button');
-              removeButton.className = 'remove-button';
-              removeButton.innerHTML = '&times;';
-              removeButton.onclick = () => {
-                  imgContainer.remove();
-                  if (previewContainer.childElementCount === 0) {
-                      dropAreaLabel.style.display = 'flex';
-                  }
-              };
+        // Create remove button
+        const removeButton = document.createElement('button');
+        removeButton.className = 'remove-button';
+        removeButton.innerHTML = '&times;';
+        removeButton.onclick = () => {
+          imgContainer.remove();
 
-              // Append elements
-              imgContainer.appendChild(img);
-              imgContainer.appendChild(removeButton);
-              previewContainer.appendChild(imgContainer);
-          };
-          reader.readAsDataURL(file);
-      }
+          // If no more children, reset the drop area label and clear the input
+          if (previewContainer.childElementCount === 0) {
+            dropAreaLabel.style.display = 'flex';
+            fileInput.value = ''; // Reset the file input
+          }
+        };
+
+        // Append elements
+        imgContainer.appendChild(img);
+        imgContainer.appendChild(removeButton);
+        previewContainer.appendChild(imgContainer);
+      };
+      reader.readAsDataURL(file);
+    }
   });
 }
 
@@ -153,18 +156,23 @@ function loadResults() {
         );
       }
 
-      const statsSection = sectionTitles[3]; // Index corresponds to "Statistical Characteristics"
-        if (statsSection) {
-            statsSection.insertAdjacentHTML(
-                'afterend',
-                `<ul class="results-stats">
-                    <li><strong>Processing Channel:</strong> ${channel || 'Not specified'}</li>
-                    <li><strong>Filter:</strong> ${filter_tu || 'Not specified'}</li>
-                    <li><strong>Noise Modeling:</strong> ${noise || 'Not specified'}</li>
-                    <li><strong> ${noise === 'Gaussian' ? 'Noise Corruption Coefficient' : noise === 'Impulse' ? 'Corruption Rate' : 'Noise Corruption Coefficient/Corruption Rate'}:</strong> ${cValue || 'Not available'}</li>
-                </ul>`
-            );
-        }
+      const statsTable = document.querySelector('#statistical-characteristics-table-container tbody');
+      if (statsTable) {
+          const statsRow = statsTable.rows[0];
+          if (statsRow) {
+              statsRow.cells[0].textContent = channel || 'Not specified';
+
+              statsRow.cells[1].textContent = filter_tu || 'Not specified';
+
+              statsRow.cells[2].textContent = noise || 'Not specified';
+
+              const corruptionRateLabel = noise === 'Gaussian' 
+                  ? 'Noise Corruption Coefficient' 
+                  : (noise === 'Impulse' ? 'Corruption Rate' : 'Noise Corruption Coefficient/Corruption Rate');
+              statsRow.cells[3].textContent = cValue || 'Not available';
+          }
+      }
+
 
         const metricsTable = document.querySelector('#metrics-table-container tbody');
         if (metricsTable) {
