@@ -109,7 +109,7 @@
   flex-direction: column;
   margin-left: auto;
   margin-right: auto;
-  max-width: 896px; /* Equivalent to 4xl in Tailwind */
+  max-width: 1000px; /* Equivalent to 4xl in Tailwind */
   overflow: hidden;
   padding: 2rem;
 }
@@ -200,8 +200,33 @@
   margin-top: 1rem;
 }
 
+.section-title2{
+  color: #3730a3;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-left: 2rem;
+}
+
 .subtitles-flex {
   align-items: flex-start; /* Vertically aligns items in the center */
   display: flex;
   margin-bottom: 10px; /* Adds spacing between options */
+}
+
+.table-rounded {
+  border-radius: 10px; /* Rounds only the outermost corners of the table */
+  border-collapse: collapse; /* Ensure the inner borders remain straight */
+  overflow: hidden; /* Hide any overflow from the rounded corners */
+  border: 1px solid black; /* Light gray border for the outermost border */
+}
+
+.table-rounded th, .table-rounded td {
+  border: 1px solid black; /* Keep inner borders straight */
+  padding: 10px; /* Ensure cells have padding */
+  text-align: center; /* Center the text in the cells */
+}
+
+.table-rounded thead {
+  background-color: #f3f4f6; /* Light gray background for the header */
 }

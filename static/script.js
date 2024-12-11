@@ -7,10 +7,7 @@ function previewFiles(files) {
   const previewContainer = document.getElementById('preview');
   const dropAreaLabel = document.getElementById('drop-area-label');
 
-  // Hide label text when an image is added
   dropAreaLabel.style.display = 'none';
-
-  // Clear previous previews
   previewContainer.innerHTML = '';
 
   // Loop through files and add each to preview
@@ -129,13 +126,16 @@ function loadResults() {
     .then(data => {
       const noisyImage = data.noisy_image;
       let cValue = data.c_value;
-
-    // Round `cValue` to two decimal places
       if (cValue !== undefined && cValue !== null) {
         cValue = parseFloat(cValue).toFixed(2);
       }
+      const filteredImage = data.filtered_image;
+      rmse = data.rmse;
+      psnr = data.psnr;
+      stats_initial = data.stats_initial;
+      stats_noisy = data.stats_noisy;
+      stats_filtered = data.stats_filtered;
 
-      // Insert the noisy (blurred) image
       const sectionTitles = document.querySelectorAll('.section-title');
       const blurredImageSection = sectionTitles[1]; // Index corresponds to "Noisy Image"
       if (blurredImageSection && noisyImage) {
@@ -145,21 +145,53 @@ function loadResults() {
         );
       }
 
-      const statsSection = sectionTitles[3]; // Index corresponds to "Statistical Characteristics"
-      if (statsSection) {
-        statsSection.insertAdjacentHTML(
+      const filteredImageSection = sectionTitles[2]; // Index corresponds to "Filtered Image"
+      if (filteredImageSection && filteredImage) {
+        filteredImageSection.insertAdjacentHTML(
           'afterend',
-          `<ul class="results-stats">
-            <li><strong>Processing Channel:</strong> ${channel || 'Not specified'}</li>
-            <li><strong>Filter:</strong> ${filter_tu || 'Not specified'}</li>
-            <li><strong>Noise Modeling:</strong> ${noise || 'Not specified'}</li>
-            <li><strong> ${noise === 'Gaussian' ? 'Noise Corruption Coefficient' : noise === 'Impulse' ? 'Corruption Rate' : 'Noise Corruption Coefficient/Corruption Rate'}:
-            </strong> ${cValue || 'Not available'}
-            </li>
-          </ul>`
+          `<img src="${filteredImage}" alt="Filtered Image" class="results-image">`
         );
       }
-      
+
+      const statsSection = sectionTitles[3]; // Index corresponds to "Statistical Characteristics"
+        if (statsSection) {
+            statsSection.insertAdjacentHTML(
+                'afterend',
+                `<ul class="results-stats">
+                    <li><strong>Processing Channel:</strong> ${channel || 'Not specified'}</li>
+                    <li><strong>Filter:</strong> ${filter_tu || 'Not specified'}</li>
+                    <li><strong>Noise Modeling:</strong> ${noise || 'Not specified'}</li>
+                    <li><strong> ${noise === 'Gaussian' ? 'Noise Corruption Coefficient' : noise === 'Impulse' ? 'Corruption Rate' : 'Noise Corruption Coefficient/Corruption Rate'}:</strong> ${cValue || 'Not available'}</li>
+                </ul>`
+            );
+        }
+
+        const metricsTable = document.querySelector('#metrics-table-container tbody');
+        if (metricsTable) {
+        // Populate the RMSE row
+          const rmseRow = metricsTable.rows[0];
+          if (rmseRow && rmse) {
+              rmseRow.cells[1].textContent = rmse.R || '-'; // R column
+              rmseRow.cells[2].textContent = rmse.G || '-'; // G column
+              rmseRow.cells[3].textContent = rmse.B || '-'; // B column
+              rmseRow.cells[4].textContent = rmse.Y || '-'; // Y (luma) column
+              rmseRow.cells[5].textContent = rmse.Combined || '-'; // Combined column
+          }
+
+          // Populate the PSNR row
+          const psnrRow = metricsTable.rows[1];
+          if (psnrRow && psnr) {
+              psnrRow.cells[1].textContent = psnr.R || '-'; // R column
+              psnrRow.cells[2].textContent = psnr.G || '-'; // G column
+              psnrRow.cells[3].textContent = psnr.B || '-'; // B column
+              psnrRow.cells[4].textContent = psnr.Y || '-'; // Y (luma) column
+              psnrRow.cells[5].textContent = psnr.Combined || '-'; // Combined column
+          }
+        }
+        
+        populateTable(stats_initial, 'initial-image-table-container');
+        populateTable(stats_noisy, 'noisy-image-table-container');
+        populateTable(stats_filtered, 'filtered-image-table-container');
     })
     .catch(error => {
       console.error('Error fetching the noisy image:', error);
@@ -167,6 +199,31 @@ function loadResults() {
     });
 }
 
+function populateTable(stats, tableId) {
+  // Get the table body for the specified table ID
+  const tableBody = document.querySelector(`#${tableId} tbody`);
+  if (!tableBody || !stats) {
+      console.error('Invalid table ID or stats object');
+      return;
+  }
+
+  // Define the order of metrics in the table
+  const metricsOrder = ['Min', 'Max', 'Mean', 'Standard Deviation', 'Variance', 'SNR'];
+
+  // Iterate over each row in the table
+  metricsOrder.forEach((metric, rowIndex) => {
+      const row = tableBody.rows[rowIndex];
+      if (row) {
+          // Populate each cell for the metric (R, G, B columns)
+          ['R', 'G', 'B'].forEach((channel, colIndex) => {
+              const cell = row.cells[colIndex + 1]; // +1 because the first cell is the metric name
+              if (cell) {
+                  cell.textContent = stats[channel]?.[metric] ?? '-';
+              }
+          });
+      }
+  });
+}
 
 function goBack() {
   window.location.href = 'http://127.0.0.1:5000/';

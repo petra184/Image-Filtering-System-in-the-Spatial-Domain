@@ -7,13 +7,13 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+<body class="body" onload="loadResults()">
     <button onclick="goBack()" class="go-back-button">
         <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
         </svg>
         Go Back
     </button>
-<body class="body" onload="loadResults()">
     <div class="main_rectangle">
         <h1 class="page-title">Results</h1>
 
@@ -21,16 +21,223 @@
             <div>
               <h2 class="section-title">Initial Image:</h2>
             </div> 
-           <div> 
+            <div> 
                 <h2 class="section-title">Noisy Image:</h2>
-           </div>
-           <div> 
-            <h2 class="section-title">Filtered Image:</h2>
-          </div>
-          <div>
-            <h2 class="section-title">Statistical Characteristics:</h2>
-          </div>
+            </div>
+            <div> 
+                <h2 class="section-title">Filtered Image:</h2>
+            </div>
+            <div>
+                <h2 class="section-title">Statistical Characteristics:</h2>
+            </div>
+            <div>
+                <h2 class="section-title">Metrics:</h2>
+                <div id="metrics-table-container">
+                    <table class="table-auto border-collapse table-rounded border border-gray-400 w-full text-center">
+                        <thead>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Metric</th>
+                                <th class="border border-gray-400 px-4 py-2">R</th>
+                                <th class="border border-gray-400 px-4 py-2">G</th>
+                                <th class="border border-gray-400 px-4 py-2">B</th>
+                                <th class="border border-gray-400 px-4 py-2">Y (luma)</th>
+                                <th class="border border-gray-400 px-4 py-2">Combined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">RMSE</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">PSNR</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+
+        <div class="image-details-section">
+            <h2 class="section-title2">Image Details:</h2>
+        
+            <div class="mt-4 flex space-x-3">
+                <!-- Initial Image Table -->
+                <div id="initial-image-table-container" class="mb-6">
+                    <table class="table-auto border-collapse table-rounded border border-gray-400 w-full text-center">
+                        <thead>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2" colspan="4">Initial Image</th>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Metric</th>
+                                <th class="border border-gray-400 px-4 py-2">R</th>
+                                <th class="border border-gray-400 px-4 py-2">G</th>
+                                <th class="border border-gray-400 px-4 py-2">B</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Min</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Max</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Mean</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Standard Deviation</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Variance</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">SNR</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+        
+                <!-- Noisy Image Table -->
+                <div id="noisy-image-table-container" class="mb-6">
+                    <table class="table-auto border-collapse table-rounded border border-gray-400 w-full text-center">
+                        <thead>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2" colspan="4">Noisy Image</th>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Metric</th>
+                                <th class="border border-gray-400 px-4 py-2">R</th>
+                                <th class="border border-gray-400 px-4 py-2">G</th>
+                                <th class="border border-gray-400 px-4 py-2">B</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Min</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Max</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Mean</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Standard Deviation</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Variance</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">SNR</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+        
+                <!-- Filtered Image Table -->
+                <div id="filtered-image-table-container" class="mb-6">
+                    <table class="table-auto border-collapse table-rounded border border-gray-400 w-full text-center">
+                        <thead>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2" colspan="4">Filtered Image</th>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Metric</th>
+                                <th class="border border-gray-400 px-4 py-2">R</th>
+                                <th class="border border-gray-400 px-4 py-2">G</th>
+                                <th class="border border-gray-400 px-4 py-2">B</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Min</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Max</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Mean</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Standard Deviation</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">Variance</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <th class="border border-gray-400 px-4 py-2">SNR</th>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                                <td class="border border-gray-400 px-4 py-2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
